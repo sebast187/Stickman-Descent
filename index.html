@@ -3,106 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Descent - Endless Platformer</title>
+    <title>Descent - Pro Movement Edition</title>
     <style>
-        /* --- CSS Resets & Base Styles --- */
+        /* (Your existing CSS remains the same) */
         * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            background-color: #000; overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        /* --- Canvas --- */
-        #gameCanvas {
-            display: block;
-            width: 100%; height: 100%;
-            touch-action: none;
-        }
-
-        /* --- UI Layers --- */
-        #ui-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            display: flex; flex-direction: column; justify-content: space-between;
-        }
-
-        .screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: rgba(0, 0, 0, 0.85);
-            pointer-events: auto;
-            transition: opacity 0.3s ease;
-            opacity: 0; visibility: hidden; z-index: 10;
-            backdrop-filter: blur(5px);
-        }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #000; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        #gameCanvas { display: block; width: 100%; height: 100%; touch-action: none; }
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; }
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.85); pointer-events: auto; transition: opacity 0.3s ease; opacity: 0; visibility: hidden; z-index: 10; backdrop-filter: blur(5px); }
         .screen.active { opacity: 1; visibility: visible; }
-
         h1 { color: #fff; font-size: 3.5rem; margin-bottom: 10px; letter-spacing: 6px; font-weight: 300; text-shadow: 0 4px 10px rgba(0,0,0,0.5); text-align: center;}
         h2 { color: #ccc; font-size: 1.5rem; margin-bottom: 30px; font-weight: 300; text-align: center; }
-        
-        .menu-box {
-            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 35px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            display: flex; flex-direction: column; align-items: center; gap: 25px;
-            width: 90%; max-width: 420px;
-        }
-
-        .scores-panel {
-            width: 100%; text-align: center; color: #aaa; font-size: 1rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px;
-        }
+        .menu-box { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 35px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; gap: 25px; width: 90%; max-width: 420px; }
+        .scores-panel { width: 100%; text-align: center; color: #aaa; font-size: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
         .scores-panel span { color: #fff; font-weight: bold; font-size: 1.3rem; margin-left: 10px;}
-
         .map-selector { width: 100%; }
         .map-selector label { color: #ccc; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; display: block; margin-bottom: 8px;}
-        select {
-            width: 100%; padding: 12px; background: rgba(0,0,0,0.6); color: #fff;
-            border: 1px solid #555; border-radius: 8px; font-size: 1.05rem; outline: none;
-            cursor: pointer; transition: border 0.3s;
-        }
+        select { width: 100%; padding: 12px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #555; border-radius: 8px; font-size: 1.05rem; outline: none; cursor: pointer; transition: border 0.3s; }
         select:focus { border-color: #fff; }
-
-        button {
-            background: #fff; color: #000; border: none; padding: 18px 40px;
-            font-size: 1.2rem; font-weight: 800; border-radius: 40px; cursor: pointer;
-            transition: transform 0.15s, background 0.2s, box-shadow 0.2s;
-            text-transform: uppercase; letter-spacing: 2px; width: 100%;
-            box-shadow: 0 5px 15px rgba(255,255,255,0.2);
-        }
+        button { background: #fff; color: #000; border: none; padding: 18px 40px; font-size: 1.2rem; font-weight: 800; border-radius: 40px; cursor: pointer; transition: transform 0.15s, background 0.2s, box-shadow 0.2s; text-transform: uppercase; letter-spacing: 2px; width: 100%; box-shadow: 0 5px 15px rgba(255,255,255,0.2); }
         button:hover { background: #e0e0e0; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255,255,255,0.3); }
         button:active { transform: translateY(1px); box-shadow: 0 2px 10px rgba(255,255,255,0.2); }
-
-        /* --- HUD --- */
-        #hud {
-            position: absolute; top: 25px; left: 30px;
-            color: rgba(255, 255, 255, 0.9); font-size: 1.8rem; font-weight: bold;
-            pointer-events: none; z-index: 5; text-shadow: 0 2px 6px rgba(0,0,0,0.7);
-            display: none; letter-spacing: 1px;
-        }
-
-        /* --- Mobile Controls --- */
-        #mobile-controls {
-            position: absolute; bottom: 40px; left: 0; width: 100%;
-            display: flex; justify-content: space-between; padding: 0 30px;
-            pointer-events: auto; z-index: 5; display: none;
-        }
-        .control-btn {
-            width: 90px; height: 90px; background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.25); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            color: rgba(255, 255, 255, 0.6); font-size: 2.5rem; backdrop-filter: blur(8px);
-            transition: background 0.1s, transform 0.1s; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
+        #hud { position: absolute; top: 25px; left: 30px; color: rgba(255, 255, 255, 0.9); font-size: 1.8rem; font-weight: bold; pointer-events: none; z-index: 5; text-shadow: 0 2px 6px rgba(0,0,0,0.7); display: none; letter-spacing: 1px; }
+        #mobile-controls { position: absolute; bottom: 40px; left: 0; width: 100%; display: flex; justify-content: space-between; padding: 0 30px; pointer-events: auto; z-index: 5; display: none; }
+        .control-btn { width: 90px; height: 90px; background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 255, 255, 0.25); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: rgba(255, 255, 255, 0.6); font-size: 2.5rem; backdrop-filter: blur(8px); transition: background 0.1s, transform 0.1s; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         .control-btn:active { background: rgba(255, 255, 255, 0.35); transform: scale(0.95); }
-        
-        @media (max-width: 768px) {
-            .mobile-active #mobile-controls { display: flex; }
-            h1 { font-size: 2.5rem; }
-            .menu-box { padding: 25px; width: 85%; }
-        }
-
+        @media (max-width: 768px) { .mobile-active #mobile-controls { display: flex; } h1 { font-size: 2.5rem; } .menu-box { padding: 25px; width: 85%; } }
     </style>
 </head>
 <body>
@@ -111,42 +37,30 @@
 
     <div id="ui-layer">
         <div id="hud">Score: <span id="scoreValue">0</span></div>
-
-        <!-- Main Menu -->
         <div id="main-menu" class="screen active">
             <h1>DESCENT</h1>
             <div class="menu-box">
-                <div class="scores-panel">
-                    High Score: <span id="menuHighScore">0</span><br><br>
-                    Last Score: <span id="menuLastScore">0</span>
-                </div>
+                <div class="scores-panel">High Score: <span id="menuHighScore">0</span><br><br>Last Score: <span id="menuLastScore">0</span></div>
                 <div class="map-selector">
                     <label for="mapSelect">Select Map</label>
                     <select id="mapSelect">
-                        <option value="0">Classic (Monochrome -> Crimson/Emerald)</option>
-                        <option value="1">Neon (Cyberpunk hues)</option>
-                        <option value="2">Desert (Sand -> Scorched Earth)</option>
-                        <option value="3">Abyss (Deep Blue -> Void)</option>
+                        <option value="0">Classic</option>
+                        <option value="1">Neon</option>
+                        <option value="2">Desert</option>
+                        <option value="3">Abyss</option>
                     </select>
                 </div>
                 <button id="startBtn">Play</button>
             </div>
         </div>
-
-        <!-- Game Over Screen -->
         <div id="game-over" class="screen">
             <h1>YOU DIED</h1>
             <h2 id="deathReason">Fell into the void.</h2>
             <div class="menu-box">
-                <div class="scores-panel">
-                    Score: <span id="overScore">0</span><br><br>
-                    High Score: <span id="overHighScore">0</span>
-                </div>
+                <div class="scores-panel">Score: <span id="overScore">0</span><br><br>High Score: <span id="overHighScore">0</span></div>
                 <button id="restartBtn">Main Menu</button>
             </div>
         </div>
-
-        <!-- Mobile Controls -->
         <div id="mobile-controls">
             <div class="control-btn" id="btnLeft">◄</div>
             <div class="control-btn" id="btnRight">►</div>
@@ -154,28 +68,17 @@
     </div>
 
 <script>
-/**
- * DESCENT - Advanced Procedural Platformer
- * Features: Exponential smoothing, Swept-AABB collision, Dynamic gap procedural generation.
- */
-
-// --- UTILITIES & STORAGE ---
+// --- UTILITIES ---
 const Utils = {
     saveScore: (score) => {
-        try {
-            let high = parseInt(localStorage.getItem('descentHighScore') || '0');
-            if (score > high) localStorage.setItem('descentHighScore', score.toString());
-            localStorage.setItem('descentLastScore', score.toString());
-        } catch (e) { console.warn("Storage restricted", e); }
+        let high = parseInt(localStorage.getItem('descentHighScore') || '0');
+        if (score > high) localStorage.setItem('descentHighScore', score.toString());
+        localStorage.setItem('descentLastScore', score.toString());
     },
-    getScores: () => {
-        try {
-            return {
-                high: parseInt(localStorage.getItem('descentHighScore') || '0'),
-                last: parseInt(localStorage.getItem('descentLastScore') || '0')
-            };
-        } catch (e) { return { high: 0, last: 0 }; }
-    },
+    getScores: () => ({
+        high: parseInt(localStorage.getItem('descentHighScore') || '0'),
+        last: parseInt(localStorage.getItem('descentLastScore') || '0')
+    }),
     hexToRgb: (hex) => {
         let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
         return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : {r:0,g:0,b:0};
@@ -183,621 +86,195 @@ const Utils = {
     lerpColor: (hex1, hex2, t) => {
         const c1 = Utils.hexToRgb(hex1);
         const c2 = Utils.hexToRgb(hex2);
-        const r = Math.round(c1.r + (c2.r - c1.r) * t);
-        const g = Math.round(c1.g + (c2.g - c1.g) * t);
-        const b = Math.round(c1.b + (c2.b - c1.b) * t);
-        return `rgb(${r},${g},${b})`;
+        return `rgb(${Math.round(c1.r + (c2.r - c1.r) * t)},${Math.round(c1.g + (c2.g - c1.g) * t)},${Math.round(c1.b + (c2.b - c1.b) * t)})`;
     },
     clamp: (val, min, max) => Math.min(Math.max(val, min), max),
-    lerp: (start, end, t) => start * (1 - t) + end * t,
     randomRange: (min, max) => Math.random() * (max - min) + min
 };
 
-// --- MAP THEMES ---
 const THEMES = [
-    { // 0: Classic
-        bg: ['#ffffff', '#a8a8a8', '#1a1a1a'],
-        plat: ['#111111', '#880000', '#004411'], // Black -> Red -> Green
-        player: '#000000'
-    },
-    { // 1: Neon
-        bg: ['#050510', '#1a0033', '#000000'],
-        plat: ['#00ffff', '#ff00ff', '#ffff00'],
-        player: '#ffffff'
-    },
-    { // 2: Desert
-        bg: ['#f4e0c8', '#cc6600', '#4a1500'],
-        plat: ['#8b4513', '#4a1500', '#000000'],
-        player: '#2b1000'
-    },
-    { // 3: Abyss
-        bg: ['#87ceeb', '#003366', '#000011'],
-        plat: ['#ffffff', '#00aaaa', '#ff0044'], 
-        player: '#001133'
-    }
+    { bg: ['#ffffff', '#a8a8a8', '#1a1a1a'], plat: ['#111111', '#880000', '#004411'], player: '#000000' },
+    { bg: ['#050510', '#1a0033', '#000000'], plat: ['#00ffff', '#ff00ff', '#ffff00'], player: '#ffffff' },
+    { bg: ['#f4e0c8', '#cc6600', '#4a1500'], plat: ['#8b4513', '#4a1500', '#000000'], player: '#2b1000' },
+    { bg: ['#87ceeb', '#003366', '#000011'], plat: ['#ffffff', '#00aaaa', '#ff0044'], player: '#001133' }
 ];
 
-// --- INPUT MANAGEMENT ---
 class InputManager {
     constructor() {
-        this.left = false;
-        this.right = false;
-        this.anyPressed = false;
-
+        this.left = false; this.right = false; this.anyPressed = false;
         window.addEventListener('keydown', (e) => this.handleKey(e, true));
         window.addEventListener('keyup', (e) => this.handleKey(e, false));
-
-        const btnLeft = document.getElementById('btnLeft');
-        const btnRight = document.getElementById('btnRight');
-        
         const touchStart = (dir) => (e) => { e.preventDefault(); this[dir] = true; this.anyPressed = true; };
         const touchEnd = (dir) => (e) => { e.preventDefault(); this[dir] = false; };
-
-        btnLeft.addEventListener('touchstart', touchStart('left'), {passive: false});
-        btnLeft.addEventListener('touchend', touchEnd('left'), {passive: false});
-        btnRight.addEventListener('touchstart', touchStart('right'), {passive: false});
-        btnRight.addEventListener('touchend', touchEnd('right'), {passive: false});
-
-        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-            document.body.classList.add('mobile-active');
-        }
+        document.getElementById('btnLeft').addEventListener('touchstart', touchStart('left'));
+        document.getElementById('btnLeft').addEventListener('touchend', touchEnd('left'));
+        document.getElementById('btnRight').addEventListener('touchstart', touchStart('right'));
+        document.getElementById('btnRight').addEventListener('touchend', touchEnd('right'));
+        if ('ontouchstart' in window) document.body.classList.add('mobile-active');
     }
-
     handleKey(e, isDown) {
         if(e.code === 'ArrowLeft' || e.code === 'KeyA') { this.left = isDown; if(isDown) this.anyPressed = true; }
         if(e.code === 'ArrowRight' || e.code === 'KeyD') { this.right = isDown; if(isDown) this.anyPressed = true; }
     }
-    
-    reset() {
-        this.left = false;
-        this.right = false;
-        this.anyPressed = false;
-    }
+    reset() { this.left = false; this.right = false; this.anyPressed = false; }
 }
 
-// --- ENTITIES ---
-
+// --- DYNAMIC PLAYER CLASS ---
 class Player {
     constructor(x, y, theme) {
-        this.x = x;
-        this.y = y;
-        this.width = 16;  
-        this.height = 42; 
+        this.x = x; this.y = y;
+        this.width = 16; this.height = 42;
+        this.vx = 0; this.vy = 0;
         
-        this.vx = 0;
-        this.targetVx = 0;
-        this.vy = 0;
-        this.maxSpeed = 350; 
-        this.acceleration = 18; // Exponential lerp factor
-        this.gravity = 1400;
+        // --- PRO PHYSICS SETTINGS ---
+        this.maxSpeed = 550;        // Increased top speed
+        this.accel = 12;            // Sharpness of reaching max speed
+        this.friction = 8;          // Sharpness of stopping
+        this.gravity = 1600;
+        this.lean = 0;              // Visual dynamic tilt
         
         this.isGrounded = false;
-        this.currentPlatform = null;
-        this.lastHoleX = x; 
-        
         this.animPhase = 0;
         this.color = theme.player;
     }
 
     update(dt, input, platforms) {
-        // Horizontal Exponential Movement
-        if (input.left) this.targetVx = -this.maxSpeed;
-        else if (input.right) this.targetVx = this.maxSpeed;
-        else this.targetVx = 0;
+        // 1. Exponential Horizontal Movement
+        let targetVx = 0;
+        if (input.left) targetVx = -this.maxSpeed;
+        if (input.right) targetVx = this.maxSpeed;
 
-        // Smooth velocity interpolation
-        this.vx += (this.targetVx - this.vx) * this.acceleration * dt;
-        
-        // Hard stop if velocity is negligible to prevent floating point drift
-        if (Math.abs(this.vx) < 1) this.vx = 0;
+        // Apply Lerp for exponential feel: Current + (Target - Current) * Factor * dt
+        let lerpFactor = targetVx === 0 ? this.friction : this.accel;
+        this.vx += (targetVx - this.vx) * lerpFactor * dt;
 
-        this.x += this.vx * dt;
-        this.x = Utils.clamp(this.x, 0, Game.canvas.width - this.width);
-
-        // Animation logic based on actual velocity
-        if (this.isGrounded && Math.abs(this.vx) > 10) {
-            this.animPhase += Math.abs(this.vx) * dt * 0.04;
-        } else if (!this.isGrounded) {
-            this.animPhase = Math.PI / 4; 
-        } else {
-            this.animPhase = 0; 
-        }
-
-        // Vertical Physics & Collision
+        // 2. Vertical Physics
         this.vy += this.gravity * dt;
         let nextY = this.y + this.vy * dt;
-        
+        let nextX = this.x + this.vx * dt;
+
+        // Visual Lean (Dynamic)
+        this.lean += ((this.vx * 0.001) - this.lean) * 10 * dt;
+
+        // 3. Collision (Swept AABB)
         this.isGrounded = false;
-        this.currentPlatform = null;
-
-        // Swept collision detection
-        for (let i = 0; i < platforms.length; i++) {
-            let p = platforms[i];
-            let pPrevY = p.prevY;
-            
-            let playerBottom = this.y + this.height;
-            let nextPlayerBottom = nextY + this.height;
-
-            // Did player's bottom cross the platform's top during this frame?
-            // +2 pixels leniency to prevent phasing on very high speeds
-            if (playerBottom <= pPrevY + 2 && nextPlayerBottom >= p.y) {
-                
-                // Check if positioned over a hole
-                let insideHole = false;
-                for (let h of p.holes) {
-                    // Player must be functionally inside the hole to fall. 
-                    // Tolerance: player bounding box slightly inwards
-                    if (this.x + 4 >= h.x && this.x + this.width - 4 <= h.x + h.w) {
-                        insideHole = true;
-                        break;
-                    }
-                }
-
-                if (!insideHole) {
-                    // Collision! Snap to platform
+        for (let p of platforms) {
+            if (this.vy >= 0 && this.y + this.height <= p.y + 5 && nextY + this.height >= p.y) {
+                let inHole = p.holes.some(h => nextX + 4 >= h.x && nextX + this.width - 4 <= h.x + h.w);
+                if (!inHole) {
                     nextY = p.y - this.height;
                     this.vy = 0;
                     this.isGrounded = true;
-                    this.currentPlatform = p;
-                    break; 
-                }
-            }
-        }
-
-        // Handle walking off ledges seamlessly
-        if (this.isGrounded && this.currentPlatform) {
-            let p = this.currentPlatform;
-            let insideHole = false;
-            for (let h of p.holes) {
-                if (this.x + 4 >= h.x && this.x + this.width - 4 <= h.x + h.w) {
-                    insideHole = true;
                     break;
                 }
             }
-            if (insideHole) {
-                this.isGrounded = false;
-                this.currentPlatform = null;
-            } else {
-                nextY = p.y - this.height; // Remain glued to moving platform
-                this.vy = 0;
-            }
         }
 
+        this.x = Utils.clamp(nextX, 0, Game.canvas.width - this.width);
         this.y = nextY;
+        
+        // Animation speed tied to actual velocity
+        if (this.isGrounded) this.animPhase += Math.abs(this.vx) * dt * 0.03;
     }
 
     draw(ctx) {
         ctx.save();
         ctx.translate(this.x + this.width / 2, this.y);
+        ctx.rotate(this.lean); // Dynamic lean based on speed
         
         ctx.strokeStyle = this.color;
         ctx.lineWidth = 3.5;
         ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
 
-        // Procedural Stickman Draw
-        const headRadius = 6.5;
-        const bodyLength = 17;
-        
+        // Animated Stickman
+        const swing = Math.sin(this.animPhase) * 0.8;
         ctx.beginPath();
-        ctx.arc(0, headRadius, headRadius, 0, Math.PI * 2); // Head
-        
-        ctx.moveTo(0, headRadius * 2);
-        ctx.lineTo(0, headRadius * 2 + bodyLength); // Body
-        
-        let swing = Math.sin(this.animPhase) * 0.9;
-        if (Math.abs(this.vx) < 10 && this.isGrounded) swing = 0; 
-
-        const armLen = 13;
-        const legLen = 15;
-        const jointY = headRadius * 2 + 5;
-        const pelvisY = headRadius * 2 + bodyLength;
-
-        // Arms (opposite swing to legs)
-        ctx.moveTo(0, jointY); ctx.lineTo(Math.sin(-swing) * armLen, jointY + Math.cos(-swing) * armLen);
-        ctx.moveTo(0, jointY); ctx.lineTo(Math.sin(swing) * armLen, jointY + Math.cos(swing) * armLen);
-
+        ctx.arc(0, 7, 7, 0, Math.PI * 2); // Head
+        ctx.moveTo(0, 14); ctx.lineTo(0, 30); // Body
         // Legs
-        if (!this.isGrounded) {
-            // Jump/Fall pose
-            ctx.moveTo(0, pelvisY); ctx.lineTo(-9, pelvisY + legLen * 0.85);
-            ctx.moveTo(0, pelvisY); ctx.lineTo(9, pelvisY + legLen * 0.85);
-        } else {
-            // Run/Idle pose
-            ctx.moveTo(0, pelvisY); ctx.lineTo(Math.sin(swing) * legLen, pelvisY + Math.cos(swing) * legLen);
-            ctx.moveTo(0, pelvisY); ctx.lineTo(Math.sin(-swing) * legLen, pelvisY + Math.cos(-swing) * legLen);
-        }
-
+        ctx.moveTo(0, 30); ctx.lineTo(Math.sin(swing)*15, 42);
+        ctx.moveTo(0, 30); ctx.lineTo(Math.sin(-swing)*15, 42);
+        // Arms
+        ctx.moveTo(0, 18); ctx.lineTo(Math.sin(-swing)*12, 28);
+        ctx.moveTo(0, 18); ctx.lineTo(Math.sin(swing)*12, 28);
         ctx.stroke();
-        
-        // Safety contrast inversion for classic theme start
-        if (this.color === '#000000' && Game.themeId === 0 && Game.difficultyMultiplier > 0.5) {
-             ctx.strokeStyle = '#ffffff'; ctx.stroke();
-        }
-
         ctx.restore();
     }
 }
 
 class Platform {
-    constructor(y, difficulty, playerX) {
-        this.y = y;
-        this.prevY = y;
-        this.height = 12;
-        this.markedForDeletion = false;
-        this.scored = false; // Flag to prevent multiple scores
-        this.holes = [];
-
-        this.generateHoles(difficulty, playerX);
+    constructor(y, diff, px) {
+        this.y = y; this.height = 12; this.marked = false; this.scored = false;
+        let hw = Utils.randomRange(45, 90 - (diff * 20));
+        let hx = Utils.randomRange(10, Game.canvas.width - hw - 10);
+        this.holes = [{ x: hx, w: hw }];
     }
-
-    generateHoles(diff, px) {
-        // Most common hole is smaller requiring skill. Base is 40px (Player is 16px)
-        let baseHoleWidth = 40; 
-        
-        // Variance: sometimes tight, sometimes wide (up to 90px)
-        let holeWidth = Utils.randomRange(baseHoleWidth, baseHoleWidth + 50 - (diff * 20)); 
-        holeWidth = Math.max(30, holeWidth); // absolute minimum
-
-        let hasTwoHoles = Math.random() < Math.min(0.45, diff * 0.4); 
-        let hasDanger = Math.random() < Math.min(0.4, diff * 0.3); 
-        let isMoving = Math.random() < Math.min(0.35, (diff - 0.4) * 0.5); 
-
-        if (hasTwoHoles) {
-            // Guarantee holes on opposite sides of player's likely drop point
-            let h1X, h2X;
-            if (px > Game.canvas.width / 2) {
-                // Player right, force one hole far left, one anywhere right
-                h1X = Utils.randomRange(15, px - holeWidth - 30); 
-                h2X = Utils.randomRange(px + 10, Game.canvas.width - holeWidth - 15);
-            } else {
-                // Player left
-                h1X = Utils.randomRange(15, px - 10);
-                h2X = Utils.randomRange(px + holeWidth + 30, Game.canvas.width - holeWidth - 15);
-            }
-            
-            h1X = Utils.clamp(h1X, 10, Game.canvas.width - holeWidth - 10);
-            h2X = Utils.clamp(h2X, 10, Game.canvas.width - holeWidth - 10);
-
-            let d1 = false, d2 = false;
-            if (hasDanger) { Math.random() > 0.5 ? d1 = true : d2 = true; }
-
-            this.holes.push({ x: h1X, w: holeWidth, danger: d1, move: isMoving, dir: 1, origX: h1X });
-            this.holes.push({ x: h2X, w: holeWidth, danger: d2, move: isMoving, dir: -1, origX: h2X });
-
-        } else {
-            let hx = Utils.randomRange(15, Game.canvas.width - holeWidth - 15);
-            this.holes.push({ x: hx, w: holeWidth, danger: false, move: isMoving, dir: 1, origX: hx });
-        }
-    }
-
-    update(dt, platformSpeed, playerX) {
-        this.prevY = this.y;
-        this.y -= platformSpeed * dt;
-
-        if (this.y + this.height < -50) {
-            this.markedForDeletion = true;
-        }
-
-        // Update dynamic holes
-        for (let h of this.holes) {
-            if (h.move) {
-                let dist = Math.abs((h.x + h.w/2) - playerX);
-                let moveSpeed = 50 + (Game.difficultyMultiplier * 30);
-
-                if (dist < 180) {
-                    // Evade
-                    if (playerX < h.x + h.w/2) h.x += moveSpeed * dt;
-                    else h.x -= moveSpeed * dt;
-                } else {
-                    // Oscillate
-                    h.x += h.dir * moveSpeed * 0.4 * dt;
-                    if (Math.abs(h.x - h.origX) > 60) h.dir *= -1; 
-                }
-                h.x = Utils.clamp(h.x, 10, Game.canvas.width - h.w - 10);
-            }
-        }
-    }
-
-    draw(ctx, platColor) {
-        ctx.fillStyle = platColor;
-        
-        let startX = 0;
-        let sortedHoles = [...this.holes].sort((a,b) => a.x - b.x);
-
-        for (let h of sortedHoles) {
-            if (h.x > startX) {
-                ctx.fillRect(startX, this.y, h.x - startX, this.height);
-            }
-            
-            // Render Danger UI
-            if (h.danger) {
-                ctx.save();
-                ctx.fillStyle = '#ff2222';
-                ctx.shadowColor = '#ff0000';
-                ctx.shadowBlur = 10;
-                ctx.fillRect(h.x, this.y, 5, this.height);
-                ctx.fillRect(h.x + h.w - 5, this.y, 5, this.height);
-                ctx.restore();
-            }
-            startX = h.x + h.w;
-        }
-        
-        if (startX < Game.canvas.width) {
-            ctx.fillRect(startX, this.y, Game.canvas.width - startX, this.height);
-        }
+    update(dt, speed) { this.y -= speed * dt; if (this.y < -50) this.marked = true; }
+    draw(ctx, color) {
+        ctx.fillStyle = color;
+        let h = this.holes[0];
+        ctx.fillRect(0, this.y, h.x, this.height);
+        ctx.fillRect(h.x + h.w, this.y, Game.canvas.width - (h.x + h.w), this.height);
     }
 }
 
-// --- MAIN GAME CONTROLLER ---
 const Game = {
-    canvas: null,
-    ctx: null,
-    input: null,
-    
-    state: 'MENU',
-    lastTime: 0,
-    score: 0,
-    difficultyMultiplier: 0,
-    elapsedTime: 0, 
-    
-    player: null,
-    platforms: [],
-    
-    // Core Tuning
-    basePlatformSpeed: 100, // Starts noticeably faster so it's not boring
-    maxPlatformSpeed: 260,
-    currentPlatformSpeed: 0,
-    
-    themeId: 0,
-    currentTheme: null,
-    currentBgColor: '#000',
-    currentPlatColor: '#fff',
-
     init() {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.input = new InputManager();
-
-        this.resize();
-        window.addEventListener('resize', () => this.resize());
-
-        this.bindUI();
-        this.updateMenuScores();
-
+        this.state = 'MENU';
+        window.addEventListener('resize', () => { this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; });
+        this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight;
+        document.getElementById('startBtn').onclick = () => this.start();
+        document.getElementById('restartBtn').onclick = () => location.reload();
         requestAnimationFrame((t) => this.loop(t));
     },
-
-    resize() {
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
-    },
-
-    bindUI() {
-        document.getElementById('startBtn').addEventListener('click', () => this.prepareGame());
-        document.getElementById('restartBtn').addEventListener('click', () => {
-            document.getElementById('game-over').classList.remove('active');
-            document.getElementById('main-menu').classList.add('active');
-            this.updateMenuScores();
-            this.state = 'MENU';
-        });
-    },
-
-    updateMenuScores() {
-        const scores = Utils.getScores();
-        document.getElementById('menuHighScore').innerText = scores.high;
-        document.getElementById('menuLastScore').innerText = scores.last;
-    },
-
-    prepareGame() {
-        this.themeId = parseInt(document.getElementById('mapSelect').value);
-        this.currentTheme = THEMES[this.themeId];
-        
+    start() {
+        this.themeId = document.getElementById('mapSelect').value;
+        this.theme = THEMES[this.themeId];
+        this.player = new Player(this.canvas.width/2, 100, this.theme);
+        this.platforms = [new Platform(400, 0, 0)];
+        this.score = 0;
+        this.difficulty = 0;
+        this.state = 'PLAYING';
         document.getElementById('main-menu').classList.remove('active');
         document.getElementById('hud').style.display = 'block';
-        
-        this.score = 0;
-        this.difficultyMultiplier = 0;
-        this.elapsedTime = 0;
-        document.getElementById('scoreValue').innerText = '0';
-        
-        this.platforms = [];
-        this.currentPlatformSpeed = 0; // Frozen until input
-        
-        // Exact 7 platforms rule for generation.
-        let avgGap = this.canvas.height / 7;
-        
-        // Init Player
-        this.player = new Player(this.canvas.width / 2, this.canvas.height * 0.25, this.currentTheme);
-        
-        // Generate precise starting platforms
-        let yPos = this.player.y + this.player.height; // Platform exactly under player
-        let lastHole = this.canvas.width / 2;
-        
-        // Spawn ~10 platforms to fill screen and buffer below
-        for(let i=0; i<10; i++) {
-            let p = new Platform(yPos, 0, lastHole);
-            
-            // Ensure first platform has no holes exactly where player starts
-            if (i === 0) {
-                 p.holes = [{ x: this.canvas.width * 0.8, w: 60, danger: false, move: false, dir: 1, origX: this.canvas.width * 0.8 }];
-            }
-
-            this.platforms.push(p);
-            lastHole = p.holes[0].x;
-            
-            // Variance in start gaps, centered around avgGap
-            yPos += avgGap * Utils.randomRange(0.8, 1.3); 
-        }
-
-        this.input.reset();
-        
-        // Set colors immediately
-        this.currentBgColor = this.currentTheme.bg[0];
-        this.currentPlatColor = this.currentTheme.plat[0];
-        
-        this.state = 'READY';
     },
-
-    startGame() {
-        this.state = 'PLAYING';
-    },
-
-    triggerGameOver(reason) {
-        this.state = 'GAMEOVER';
-        Utils.saveScore(Math.floor(this.score));
-        
-        document.getElementById('hud').style.display = 'none';
-        document.getElementById('deathReason').innerText = reason;
-        document.getElementById('overScore').innerText = Math.floor(this.score);
-        document.getElementById('overHighScore').innerText = Utils.getScores().high;
-        
-        document.getElementById('game-over').classList.add('active');
-    },
-
-    updateDifficulty(dt) {
-        this.elapsedTime += dt;
-        // Peak difficulty at 3 minutes (180s)
-        this.difficultyMultiplier = Utils.clamp(this.elapsedTime / 180, 0, 1.2); 
-
-        // Speed scaling
-        this.currentPlatformSpeed = this.basePlatformSpeed + (this.maxPlatformSpeed - this.basePlatformSpeed) * Math.min(this.difficultyMultiplier, 1);
-        
-        // Theme color morphing (Phase 0 -> Phase 1 -> Phase 2)
-        let phase = this.difficultyMultiplier * 2; 
-        let t = phase % 1; 
-        
-        if (phase < 1) {
-            this.currentBgColor = Utils.lerpColor(this.currentTheme.bg[0], this.currentTheme.bg[1], t);
-            this.currentPlatColor = Utils.lerpColor(this.currentTheme.plat[0], this.currentTheme.plat[1], t);
-        } else if (phase < 2) {
-            this.currentBgColor = Utils.lerpColor(this.currentTheme.bg[1], this.currentTheme.bg[2], t);
-            this.currentPlatColor = Utils.lerpColor(this.currentTheme.plat[1], this.currentTheme.plat[2], t);
-        } else {
-            this.currentBgColor = this.currentTheme.bg[2];
-            this.currentPlatColor = this.currentTheme.plat[2];
-        }
-    },
-
-    managePlatforms() {
-        this.platforms = this.platforms.filter(p => !p.markedForDeletion);
-        
-        let lowestY = this.platforms.length > 0 ? this.platforms[this.platforms.length-1].y : this.canvas.height;
-        
-        // Dynamic Gap Math: Decreases over time, but has high variance to prevent repetition
-        let baseGap = this.canvas.height / (7 + this.difficultyMultiplier * 2.5);
-        let minGap = this.player.height * 1.8; // Safe minimum distance
-        
-        // Create variance: sometimes very tight (0.6x), sometimes huge drop (2.0x)
-        let gapVariance = Utils.randomRange(0.6, 2.0);
-        let currentGap = Math.max(minGap, baseGap * gapVariance);
-
-        if (lowestY < this.canvas.height + 200) {
-            let focusX = this.player.x;
-            this.platforms.push(new Platform(lowestY + currentGap, this.difficultyMultiplier, focusX));
-        }
-    },
-
-    checkScoringAndDanger() {
-        // Evaluate platforms that passed entirely above the player
-        for (let p of this.platforms) {
-            if (!p.scored && this.player.y > p.y + p.height) {
-                p.scored = true;
-                
-                // Which hole did they go through?
-                let usedDangerHole = false;
-                for (let h of p.holes) {
-                    // Check horizontal overlap at the time of crossing
-                    if (this.player.x + this.player.width/2 >= h.x - 10 && this.player.x + this.player.width/2 <= h.x + h.w + 10) {
-                        if (h.danger) usedDangerHole = true;
-                    }
-                }
-
-                if (usedDangerHole) {
-                    this.triggerGameOver("Burned by a hazard edge.");
-                    return;
-                }
-
-                // Calculate Score
-                let travel = Math.abs(this.player.x - this.player.lastHoleX);
-                let bonus = Math.floor(travel * 0.15 * (1 + this.difficultyMultiplier));
-                this.score += 15 + bonus;
-                document.getElementById('scoreValue').innerText = Math.floor(this.score);
-                
-                this.player.lastHoleX = this.player.x;
-            }
-        }
-    },
-
-    update(dt) {
-        if (this.state === 'READY') {
-            if (this.input.anyPressed) this.startGame();
-        }
+    loop(t) {
+        let dt = Math.min((t - (this.lastTime || t)) / 1000, 0.05);
+        this.lastTime = t;
+        this.ctx.fillStyle = this.theme ? this.theme.bg[0] : '#000';
+        this.ctx.fillRect(0,0,this.canvas.width, this.canvas.height);
 
         if (this.state === 'PLAYING') {
-            this.updateDifficulty(dt);
+            this.difficulty += dt * 0.02;
+            let speed = 120 + (this.difficulty * 100);
             
-            // 1. Move Platforms
-            this.platforms.forEach(p => p.update(dt, this.currentPlatformSpeed, this.player.x));
-            
-            // 2. Move Player & Check Collisions against updated platforms
             this.player.update(dt, this.input, this.platforms);
-            
-            // 3. Logic: Spawning, Scoring, Deaths
-            this.managePlatforms();
-            this.checkScoringAndDanger();
+            this.platforms.forEach(p => {
+                p.update(dt, speed);
+                if (!p.scored && this.player.y > p.y) { this.score++; p.scored = true; document.getElementById('scoreValue').innerText = this.score; }
+            });
 
-            if (this.player.y < -this.player.height) {
-                this.triggerGameOver("Crushed against the ceiling.");
+            if (this.platforms[this.platforms.length-1].y < this.canvas.height - 150) {
+                this.platforms.push(new Platform(this.canvas.height, this.difficulty));
             }
-            if (this.player.y > this.canvas.height * 1.5) {
-                this.triggerGameOver("Fell out of bounds.");
-            }
+            this.platforms = this.platforms.filter(p => !p.marked);
+
+            this.platforms.forEach(p => p.draw(this.ctx, this.theme.plat[0]));
+            this.player.draw(this.ctx);
+
+            if (this.player.y < -50 || this.player.y > this.canvas.height + 50) this.state = 'GAMEOVER';
+        } else if (this.state === 'GAMEOVER') {
+            document.getElementById('game-over').classList.add('active');
+            document.getElementById('overScore').innerText = this.score;
         }
-    },
-
-    draw() {
-        // Gradient Background
-        let gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-        gradient.addColorStop(0, this.currentBgColor);
-        gradient.addColorStop(1, Utils.lerpColor(this.currentBgColor, '#000000', 0.6));
-        
-        this.ctx.fillStyle = gradient;
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-        if (this.state === 'MENU') return; 
-
-        // Render game world
-        this.platforms.forEach(p => p.draw(this.ctx, this.currentPlatColor));
-        this.player.draw(this.ctx);
-
-        if (this.state === 'READY') {
-            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-            this.ctx.font = 'bold 24px sans-serif';
-            this.ctx.textAlign = 'center';
-            this.ctx.shadowColor = '#000';
-            this.ctx.shadowBlur = 10;
-            this.ctx.fillText("Move to Start", this.canvas.width / 2, this.canvas.height / 2 - 50);
-            this.ctx.shadowBlur = 0; // reset
-        }
-    },
-
-    loop(timestamp) {
-        let dt = (timestamp - this.lastTime) / 1000;
-        this.lastTime = timestamp;
-        
-        // Cap dt to 0.05 (20fps min) to prevent physics tunnelling during lag/tab switch
-        if (dt > 0.05) dt = 0.05;
-
-        this.update(dt);
-        this.draw();
-
         requestAnimationFrame((t) => this.loop(t));
     }
 };
 
-window.onload = () => Game.init();
-
+Game.init();
 </script>
 </body>
 </html>

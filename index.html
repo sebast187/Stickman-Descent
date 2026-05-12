@@ -268,12 +268,16 @@ class Player {
         this.targetVx = 0;
         this.vy = 0;
 
-        // --- DYNAMIC / EXPONENTIAL SPEED VARIABLES ---
-        this.baseMaxSpeed = 200;      // Starts slightly slower for precise short adjustments
-        this.absoluteMaxSpeed = 1100; // Huge upper limit to allow running incredibly far
-        this.speedMultiplier = 1;     // The exponential factor
-        this.acceleration = 12;       // Lowered slightly to make the momentum feel heavier
+        // --- MOVEMENT CONFIGURATION ---
+        // Mobile (Linear) 
+        this.linearMaxSpeed = 350; 
+
+        // Desktop (Exponential)
+        this.baseMaxSpeed = 200;      
+        this.absoluteMaxSpeed = 1100; 
+        this.speedMultiplier = 1;     
         
+        this.acceleration = 14; // Bridged the gap so it feels good for both control schemes
         this.gravity = 1400;
         
         this.isGrounded = false;
@@ -282,23 +286,30 @@ class Player {
         
         this.animPhase = 0;
         this.color = theme.player;
+
+        // Determine control scheme based on the class your InputManager sets
+        this.isMobile = document.body.classList.contains('mobile-active');
     }
 
     update(dt, input, platforms) {
-        // --- HORIZONTAL EXPONENTIAL MOVEMENT ---
-        if (input.left || input.right) {
-            // Grow the speed multiplier exponentially (e.g., 200% growth per second)
-            this.speedMultiplier += this.speedMultiplier * 2.0 * dt;
-            
-            // Calculate the current dynamic speed and clamp it to the absolute max
-            let dynamicSpeed = Math.min(this.baseMaxSpeed * this.speedMultiplier, this.absoluteMaxSpeed);
-            
-            if (input.left) this.targetVx = -dynamicSpeed;
-            else if (input.right) this.targetVx = dynamicSpeed;
+        // --- HORIZONTAL MOVEMENT LOGIC ---
+        if (this.isMobile) {
+            // Default Linear Movement for Mobile
+            if (input.left) this.targetVx = -this.linearMaxSpeed;
+            else if (input.right) this.targetVx = this.linearMaxSpeed;
+            else this.targetVx = 0;
         } else {
-            // Reset the exponential momentum back to normal when releasing keys
-            this.speedMultiplier = 1;
-            this.targetVx = 0;
+            // Exponential Momentum for Desktop
+            if (input.left || input.right) {
+                this.speedMultiplier += this.speedMultiplier * 2.0 * dt;
+                let dynamicSpeed = Math.min(this.baseMaxSpeed * this.speedMultiplier, this.absoluteMaxSpeed);
+                
+                if (input.left) this.targetVx = -dynamicSpeed;
+                else if (input.right) this.targetVx = dynamicSpeed;
+            } else {
+                this.speedMultiplier = 1;
+                this.targetVx = 0;
+            }
         }
 
         // Smooth velocity interpolation
